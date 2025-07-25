@@ -4,55 +4,61 @@ function App() {
   const [prompt, setPrompt] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
 
   async function generateImage() {
+    if (!prompt.trim()) return;
+
     setLoading(true);
+    setErr('');
     setImageUrl('');
 
-    const response = await fetch('https://api.stability.ai/v1/generation/stable-diffusion-v1-6/text-to-image', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_STABILITY_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        text_prompts: [{ text: prompt }],
-        cfg_scale: 7,
-        height: 512,
-        width: 512,
-        samples: 1,
-        steps: 30,
-      }),
-    });
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
 
-    const data = await response.json();
-    const base64 = data.artifacts?.[0]?.base64;
+      const data = await res.json();
 
-    if (base64) {
-      setImageUrl(`data:image/png;base64,${base64}`);
+      if (!res.ok) {
+        throw new Error(data?.message || 'Bilinmeyen hata');
+      }
+
+      if (data?.base64) {
+        setImageUrl(`data:image/png;base64,${data.base64}`);
+      } else {
+        setErr('Beklenen formatta cevap gelmedi.');
+      }
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
     <div>
       <h1>Stable Diffusion Görsel Oluşturucu</h1>
+
       <input
         type="text"
         value={prompt}
-        placeholder="Örnek: bir uzay kovboyu ayda yürüyor"
+        placeholder="Örn: ayda yürüyen bir astronot, sinematik ışık"
         onChange={(e) => setPrompt(e.target.value)}
       />
       <br />
+
       <button onClick={generateImage} disabled={loading}>
         {loading ? 'Oluşturuluyor...' : 'Resmi Oluştur'}
       </button>
 
+      {err && <p style={{ color: 'red' }}>{err}</p>}
+
       {imageUrl && (
         <div>
-          <img src={imageUrl} alt="Oluşturulan Görsel" />
+          <img src={imageUrl} alt="Oluşturulan görsel" />
           <br />
           <a href={imageUrl} download="gorsel.png" style={{ color: 'lime' }}>
             Resmi İndir
