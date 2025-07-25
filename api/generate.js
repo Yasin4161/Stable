@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
   try {
     const rsp = await fetch(
-      'https://api.stability.ai/v1/generation/stable-diffusion-v1-6/text-to-image',
+      'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image',
       {
         method: 'POST',
         headers: {
