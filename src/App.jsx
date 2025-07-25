@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-// SD-XL izinli boyutlar
 const ALLOWED_SIZES = [
   [1024, 1024], [1152, 896], [1216, 832],
   [1344, 768],  [1536, 640], [896, 1152],
@@ -9,56 +8,49 @@ const ALLOWED_SIZES = [
 
 export default function App() {
   const [prompt, setPrompt] = useState('');
-  const [width, setWidth]   = useState(1024);
-  const [height, setHeight] = useState(1024);
+  const [wh, setWh]         = useState('1024x1024');
   const [cfg, setCfg]       = useState(7);
   const [steps, setSteps]   = useState(30);
+  const [samples, setSamples] = useState(1);
 
-  const [imageUrl, setImageUrl] = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [err, setErr]           = useState('');
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
 
-  const generate = async () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) return;
-    setLoading(true); setErr(''); setImageUrl('');
+    setLoading(true); setErr(''); setImages([]);
+
+    const [width, height] = wh.split('x').map(Number);
 
     try {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, width, height, cfg, steps }),
+        body: JSON.stringify({ prompt, width, height, cfg, steps, samples }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.message || 'Hata');
-      setImageUrl(`data:image/png;base64,${data.base64}`);
-    } catch (e) {
-      setErr(e.message);
-    } finally { setLoading(false); }
+      setImages(data.base64Arr.map(b64 => `data:image/png;base64,${b64}`));
+    } catch (e) { setErr(e.message); }
+    finally { setLoading(false); }
   };
 
   return (
-    <div>
-      <h1>Stable Diffusion Görsel Oluşturucu</h1>
+    <div id="app-card">
+      <h1>Stable Diffusion Görsel Üretici</h1>
 
       <input
         type="text"
+        placeholder="Örn: 80'ler neon şehir, yağmurlu gece..."
         value={prompt}
-        placeholder="Bir hayal kur: Cyberpunk İstanbul gece..."
         onChange={e => setPrompt(e.target.value)}
-        style={{width: '90%', maxWidth: 480, padding: 12, borderRadius: 8, border: 'none', background: '#222', color:'#fff'}}
       />
 
-      {/* Ayarlar */}
-      <div className="control">
+      <div className="control-row">
         <label>
-          Çözünürlük&nbsp;
-          <select
-            value={`${width}x${height}`}
-            onChange={e => {
-              const [w, h] = e.target.value.split('x').map(Number);
-              setWidth(w); setHeight(h);
-            }}
-          >
+          Çözünürlük
+          <select value={wh} onChange={e => setWh(e.target.value)}>
             {ALLOWED_SIZES.map(([w, h]) => (
               <option key={`${w}x${h}`}>{`${w}x${h}`}</option>
             ))}
@@ -66,41 +58,41 @@ export default function App() {
         </label>
 
         <label>
-          CFG&nbsp;
+          CFG
           <input
-            type="number"
-            min={1} max={15} step={0.5}
-            value={cfg}
-            onChange={e => setCfg(Number(e.target.value))}
-            style={{width: 70}}
+            type="number" min={1} max={15} step={0.5}
+            value={cfg} onChange={e => setCfg(+e.target.value)}
           />
         </label>
 
         <label>
-          Steps&nbsp;
+          Steps
           <input
-            type="number"
-            min={10} max={60} step={1}
-            value={steps}
-            onChange={e => setSteps(Number(e.target.value))}
-            style={{width: 70}}
+            type="number" min={10} max={60} step={1}
+            value={steps} onChange={e => setSteps(+e.target.value)}
+          />
+        </label>
+
+        <label>
+          Adet (1‑30)
+          <input
+            type="number" min={1} max={30}
+            value={samples} onChange={e => setSamples(+e.target.value)}
           />
         </label>
       </div>
 
-      <button onClick={generate} disabled={loading}>
-        {loading ? 'Oluşturuluyor…' : 'Resmi Oluştur'}
+      <button onClick={handleGenerate} disabled={loading}>
+        {loading ? 'Oluşturuluyor…' : 'Görselleri Oluştur'}
       </button>
 
-      {err && <div className="error">{err}</div>}
+      {err && <div id="error">{err}</div>}
 
-      {imageUrl && (
-        <>
-          <img src={imageUrl} alt="Oluşturulan görsel" />
-          <br />
-          <a href={imageUrl} download="gorsel.png" style={{color:'#4ade80'}}>Resmi İndir</a>
-        </>
-      )}
+      <div id="gallery">
+        {images.map((src, i) => (
+          <img key={i} src={src} alt={`görsel-${i}`} />
+        ))}
+      </div>
     </div>
   );
 }
