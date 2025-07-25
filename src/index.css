@@ -1,48 +1,89 @@
+/* Koyu arka plan + merkezlenmiş kart */
 body {
-  font-family: system-ui, Roboto, "Helvetica Neue", sans-serif;
-  background: #111;
-  color: #fff;
   margin: 0;
-  padding: 2rem 1rem 4rem;
+  font-family: Inter, system-ui, sans-serif;
+  background: #0f0f15;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  color: #f5f5f5;
+}
+
+#app-card {
+  width: 100%;
+  max-width: 640px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  backdrop-filter: blur(12px);
+  padding: 2rem 1.5rem 3rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin-top: 0;
   text-align: center;
 }
 
-h1 { margin-bottom: 1.5rem; }
-
-.control {
-  display: flex;
-  gap: .5rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 8px 0;
-}
-.control label {
-  font-size: .9rem;
-}
-.control select,
-.control input[type="number"],
-.control input[type="range"] {
-  padding: 6px 10px;
-  border-radius: 6px;
+input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 12px;
   border: none;
-  font-size: .9rem;
-}
-button {
-  margin-top: 12px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  background: #4f46e5;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-button:disabled { opacity: .6; cursor: not-allowed; }
-
-img {
-  max-width: 95%;
-  margin-top: 24px;
   border-radius: 10px;
-  box-shadow: 0 0 12px rgba(0,0,0,.4);
+  background: #1d1d27;
+  color: #fff;
 }
-.error { color: #f87171; margin-top: 12px; }
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.control-row label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+}
+
+select,
+input[type="number"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: #1d1d27;
+  color: #fff;
+}
+
+button {
+  width: 100%;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #6366f1;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) { transform: translateY(-2px); }
+
+#error { color: #f97373; margin-top: 12px; text-align: center; }
+
+/* Görsel listesi */
+#gallery img {
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 14px rgba(0,0,0,.6);
+}
